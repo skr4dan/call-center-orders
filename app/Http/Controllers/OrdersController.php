@@ -48,9 +48,9 @@ class OrdersController extends Controller
             );
 
         return view('orders.index', [
-            'orders' => $query->get(),
+            'orders' => (clone $query)->paginate(50),
             'stats' => [
-                'total' => $query->count(),
+                'total' => (clone $query)->count(),
                 'new' => (clone $query)
                     ->where('status', Order::STATUS_NEW)->count(),
                 'in_progress' => (clone $query)

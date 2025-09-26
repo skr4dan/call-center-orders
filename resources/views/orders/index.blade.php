@@ -76,6 +76,10 @@
                         </x-table.row>
                     @endforelse
                 </x-table>
+
+                <div class="mt-4">
+                    <x-pagination :paginator="$orders" />
+                </div>
             </div>
         </div>
     </div>
