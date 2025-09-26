@@ -33,6 +33,7 @@ git clone https://github.com/skr4dan/call-center-orders \
 
 ## Веб-страницы
 - `/login` - вход
+- `/logout` - разлогин
 - `/` - перенаправление по роли
 - `/orders` - просмотр списка заказов (менеджер)
 - `/orders/create` - Создание заказа (оператор)
