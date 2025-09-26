@@ -1,0 +1,96 @@
+<?php
+
+namespace App\Repositories;
+
+use App\Models\Order;
+use App\Models\OrderProduct;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Arr;
+
+class OrderRepository
+{
+    public function getBaseOrderQuery(): Builder
+    {
+        return Order::query()->with('products');
+    }
+
+    public function applyFilters(Builder $query, array $filters = []): Builder
+    {
+        return $query
+            ->when($filters['search'] ?? null, function ($query, $search) {
+                // Можно сделать поиск более конкретным (вместо like) и повесить индексы итд, если нужна оптимизация
+                // Но учитывается, что проект на sqlite, то не имеет смысла
+                $query->where(function ($q) use ($search) {
+                    $q->where('fio', 'like', "%{$search}%")
+                        ->orWhere('company', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%")
+                        ->orWhereHas('products', function ($productQuery) use ($search) {
+                            $productQuery->where('name', 'like', "%{$search}%");
+                        });
+                });
+            })
+            ->when($filters['date_from'] ?? null, function ($query, $dateFrom) {
+                $query->whereDate('created_at', '>=', $dateFrom);
+            })
+            ->when($filters['date_to'] ?? null, function ($query, $dateTo) {
+                $query->whereDate('created_at', '<=', $dateTo);
+            })
+            ->when($filters['status'] ?? null, function ($query, $status) {
+                $query->where('status', $status);
+            });
+    }
+
+    public function getFilteredOrdersPaginated(array $filters = []): LengthAwarePaginator
+    {
+        $query = $this->getBaseOrderQuery()
+            ->orderBy('date', 'desc');
+
+        $query = $this->applyFilters($query, $filters);
+
+        return $query->paginate(50);
+    }
+
+    public function getFilteredOrdersForStats(array $filters = []): Builder
+    {
+        $query = Order::query();
+
+        return $this->applyFilters($query, Arr::except($filters, ['status']));
+    }
+
+    public function getOrderStatusCounts(Builder $query): array
+    {
+        return $query
+            ->selectRaw('status, COUNT(*) as count')
+            ->groupBy('status')
+            ->pluck('count', 'status')
+            ->toArray();
+    }
+
+    public function saveOrderWithProducts(array $data): Order
+    {
+        $order = Order::create([
+            'fio' => $data['fio'],
+            'phone' => $data['phone'],
+            'email' => $data['email'] ?? null,
+            'inn' => $data['inn'] ?? null,
+            'company' => $data['company'] ?? null,
+            'address' => $data['address'] ?? null,
+            'status' => $data['status'] ?? Order::STATUS_NEW,
+        ]);
+
+        if (isset($data['products']) && is_array($data['products'])) {
+            foreach ($data['products'] as $productData) {
+                if (filled($productData['name']) && $productData['quantity'] > 0) {
+                    $order->products()->create([
+                        'name' => $productData['name'],
+                        'quantity' => $productData['quantity'],
+                        'unit' => $productData['unit'] ?? OrderProduct::UNIT_PIECES,
+                    ]);
+                }
+            }
+        }
+
+        return $order->load('products');
+    }
+}
