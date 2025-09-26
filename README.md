@@ -17,12 +17,12 @@
 ```bash
 git clone https://github.com/skr4dan/call-center-orders \
 && cd call-center-orders \
-&& composer install \
 && cp .env.example .env \
 && php artisan key:generate \
 && touch database/database.sqlite \
 && php artisan migrate --seed \
 && npm install \
+&& npm update \
 && npm run build \
 && php artisan serve
 ```
