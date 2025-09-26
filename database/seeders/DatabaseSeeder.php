@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Order;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -29,5 +30,10 @@ class DatabaseSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'role_id' => Role::firstWhere('name', 'manager')->id,
             ]]);
+
+        $orders = Order::factory()
+            ->withProducts(1, 5)
+            ->state(fn () => ['created_at' => now()->subDays(random_int(0, 60))])
+            ->createMany(random_int(75, 150));
     }
 }

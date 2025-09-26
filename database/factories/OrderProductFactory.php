@@ -1,0 +1,87 @@
+<?php
+
+namespace Database\Factories;
+
+use App\Models\Order;
+use App\Models\OrderProduct;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+/**
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\OrderProduct>
+ */
+class OrderProductFactory extends Factory
+{
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        $productNamesByUnit = [
+            OrderProduct::UNIT_PIECES => [
+                'Плита ПК 12.2.5',
+                'Плита ПК 15.2.5',
+                'Блок ФБС 24.4.6',
+                'Перемычка 2ПБ 13-1',
+                'Кольцо колодезное КС 10-9',
+                'Кирпич керамический',
+                'Газобетонный блок D500',
+                'Окно ПВХ 1200x1400',
+                'Дверь металлическая входная',
+                'Лестничный марш ЛМ-12',
+                'Панель перекрытия ПБ 27-12-8',
+                'Свайный фундамент С 150x150x3000',
+                'Вентиляционный блок ВБ 2-1',
+                'Люк канализационный чугунный',
+                'Тротуарная плитка 300x300x30',
+            ],
+            OrderProduct::UNIT_METERS => [
+                'Арматура А500С d12',
+                'Арматура А500С d16',
+                'Швеллер 10П',
+                'Уголок 50x50x5',
+                'Профиль оцинкованный 60x27',
+                'Труба стальная 40x2.5',
+                'Кабель ВВГнг 3x2.5',
+                'Плинтус напольный ПВХ',
+                'Проволока вязальная 1.2 мм',
+                'Лента гидроизоляционная',
+            ],
+            OrderProduct::UNIT_KILOGRAMS => [
+                'Цемент М500',
+                'Песок строительный',
+                'Щебень фракция 5-20',
+                'Гипс строительный',
+                'Шпатлевка финишная',
+                'Клей плиточный',
+                'Известь гашеная',
+                'Мастика битумная',
+                'Антикоррозийная смесь',
+                'Сухая строительная смесь',
+            ],
+            OrderProduct::UNIT_LITERS => [
+                'Грунтовка глубокого проникновения',
+                'Краска фасадная акриловая',
+                'Антисептик для дерева',
+                'Лак паркетный',
+                'Праймер битумный',
+                'Пена монтажная',
+                'Растворитель 646',
+                'Масло для опалубки',
+                'Эмульсия для бетона',
+                'Пропитка для кирпича',
+            ],
+        ];
+
+        $unit = fake()->randomElement(array_keys($productNamesByUnit));
+        $name = fake()->randomElement($productNamesByUnit[$unit]);
+
+        return [
+            'order_id' => Order::factory(),
+            'name' => $name,
+            'quantity' => fake()->numberBetween(1, 10),
+            'unit' => $unit,
+        ];
+    }
+}
