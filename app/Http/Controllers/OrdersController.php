@@ -47,16 +47,19 @@ class OrdersController extends Controller
                 ->where('status', $request->status)
             );
 
+        $statusCounts = (clone $query)
+            ->selectRaw('status, COUNT(*) as count')
+            ->groupBy('status')
+            ->pluck('count', 'status')
+            ->toArray();
+
         return view('orders.index', [
             'orders' => (clone $query)->paginate(50),
             'stats' => [
                 'total' => (clone $query)->count(),
-                'new' => (clone $query)
-                    ->where('status', Order::STATUS_NEW)->count(),
-                'in_progress' => (clone $query)
-                    ->where('status', Order::STATUS_IN_PROGRESS)->count(),
-                'done' => (clone $query)
-                    ->where('status', Order::STATUS_DONE)->count(),
+                'new' => $statusCounts[Order::STATUS_NEW] ?? 0,
+                'in_progress' => $statusCounts[Order::STATUS_IN_PROGRESS] ?? 0,
+                'done' => $statusCounts[Order::STATUS_DONE] ?? 0,
             ],
         ]);
     }
