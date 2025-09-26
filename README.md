@@ -1,61 +1,151 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Call Center Orders
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Система управления заказами для колл-центра
 
-## About Laravel
+## Примечание по поводу ТЗ
+Из дизайна странички создания заказов непонятно, каким образом должны обрабатываться дубликаты и уже существующие клиенты
+Поэтому API-ручка, связанная с получением клиентов по номеру телефона не реализована.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Системные требования
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **PHP:** 8.2 или выше
+- **Composer:** для установки PHP зависимостей
+- **Node.js:** 18.0 или выше
+- **npm:**
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Установка
+```bash
+git clone https://github.com/skr4dan/call-center-orders \
+&& cd call-center-orders \
+&& composer install \
+&& cp .env.example .env \
+&& php artisan key:generate \
+&& touch database/database.sqlite \
+&& php artisan migrate --seed \
+&& npm install \
+&& npm run build \
+&& php artisan serve
+```
 
-## Learning Laravel
+**Готовые учетные записи для входа:**
+- **Менеджер:** `manager@example.com` / `password`
+- **Оператор:** `operator@example.com` / `password`
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Веб-страницы
+- `/login` - вход
+- `/` - перенаправление по роли
+- `/orders` - просмотр списка заказов (менеджер)
+- `/orders/create` - Создание заказа (оператор)
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## API
+**Base URL:** `/api`
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### GET /api/orders
+**Примеры запросов:**
+- `?search=иванов` (поиск по ФИО, компании, телефону и названию продукта)
+- `?date_from=2025-09-01&date_to=2025-09-30` (фильтр по дате)
+- `?status=in_progress` (заказы в работе)
 
-## Laravel Sponsors
+**Response:**
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "fio": "Виль Фёдорович Мамонтов",
+      "phone": "(812) 688-41-40",
+      "email": null,
+      "inn": null,
+      "company": "СтройАльянс",
+      "address": "181529, Калининградская область, город Мытищи, наб. Ломоносова, 69",
+      "status": "new",
+      "status_label": "Новый",
+      "products": [
+        {
+          "id": 1,
+          "name": "Перемычка 2ПБ 13-1",
+          "quantity": 6,
+          "unit": "pcs",
+          "unit_label": "Штуки",
+          "short_unit_label": "шт.",
+          "created_at": "2025-09-26T08:54:18.000000Z",
+          "updated_at": "2025-09-26T08:54:18.000000Z"
+        },
+        {
+          "id": 2,
+          "name": "Пропитка для кирпича",
+          "quantity": 8,
+          "unit": "l",
+          "unit_label": "Литры",
+          "short_unit_label": "л.",
+          "created_at": "2025-09-26T08:54:18.000000Z",
+          "updated_at": "2025-09-26T08:54:18.000000Z"
+        }
+      ],
+      "created_at": "2025-09-26T08:54:18.000000Z",
+      "updated_at": "2025-09-26T08:54:18.000000Z"
+    }
+  ],
+  "links": {
+    "first": "http://localhost:8000/api/orders?page=1",
+    "last": "http://localhost:8000/api/orders?page=3",
+    "prev": null,
+    "next": "http://localhost:8000/api/orders?page=2"
+  },
+  "meta": {
+    "current_page": 1,
+    "from": 1,
+    "last_page": 3,
+    "per_page": 50,
+    "to": 50,
+    "total": 150
+  }
+}
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### POST /api/orders
+**Пример создания заказа:**
+```json
+{
+  "fio": "Иванов Иван Иванович",
+  "phone": "+7(999)999-99-99",
+  "email": "ivanov@example.com",
+  "inn": "123456789012",
+  "company": "ООО СтройМатериалы",
+  "address": "г. Москва, ул. Ленина, д. 15, кв. 42",
+  "products": [
+    {
+      "name": "Кирпич керамический",
+      "quantity": 1000,
+      "unit": "pcs"
+    },
+    {
+      "name": "Цемент М500",
+      "quantity": 25,
+      "unit": "kg"
+    },
+    {
+      "name": "Песок строительный",
+      "quantity": 500,
+      "unit": "kg"
+    }
+  ]
+}
+```
 
-### Premium Partners
+### GET /api/orders/stats
+**Примеры запросов:**
+- `?status=new` (статистика только новых заказов)
+- `?date_from=2025-09-01&date_to=2025-09-30` (статистика за сентябрь)
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+**Response:**
+```json
+{
+  "data": {
+    "total": 50,
+    "new": 57,
+    "in_progress": 43,
+    "done": 50
+  }
+}
+```

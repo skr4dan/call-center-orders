@@ -19,7 +19,7 @@ class OrdersController extends Controller
         private readonly OrderStatisticsService $orderStatisticsService
     ) {}
 
-    public function index(FilterOrdersRequest $request): JsonResponse
+    public function index(FilterOrdersRequest $request)
     {
         $filters = $request->validated();
         $orders = $this->orderQueryService->getFilteredOrdersPaginated($filters);
@@ -33,8 +33,7 @@ class OrdersController extends Controller
 
         return (new OrderResource($order))
             ->response()
-            ->setStatusCode(201)
-            ->header('Location', route('api.orders.show', $order->id));
+            ->setStatusCode(201);
     }
 
     public function stats(FilterOrdersRequest $request): JsonResponse
