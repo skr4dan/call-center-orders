@@ -23,7 +23,7 @@ class OrdersWebTest extends TestCase
             ->actingAs($manager)
             ->get('/orders')
             ->assertOk()
-            ->assertSee('Фильтры заказов')
+            ->assertSee('Таблица заказов')
             ->assertSee($order->fio);
     }
 
