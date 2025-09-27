@@ -87,7 +87,6 @@ class OrdersApiTest extends TestCase
         ]);
     }
 
-
     public function test_can_get_order_statistics(): void
     {
         $orders = collect([
@@ -110,6 +109,4 @@ class OrdersApiTest extends TestCase
                 ],
             ]);
     }
-
-
 }
