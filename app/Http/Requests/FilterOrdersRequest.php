@@ -24,8 +24,8 @@ class FilterOrdersRequest extends FormRequest
     {
         return [
             'search' => ['nullable', 'string', 'max:255'],
-            'date_from' => ['nullable', 'date', 'date_format:Y-m-d'],
-            'date_to' => ['nullable', 'date', 'date_format:Y-m-d'],
+            'date_from' => ['nullable', 'date_format:Y-m-d'],
+            'date_to' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:date_from'],
             'status' => ['nullable', 'string', 'in:'.implode(',', array_keys(Order::STATUS_LABELS))],
         ];
     }
@@ -34,18 +34,12 @@ class FilterOrdersRequest extends FormRequest
     {
         return [
             'status.in' => 'Неверный статус.',
-            'date_from.date' => 'Неверный формат даты.',
-            'date_to.date' => 'Неверный формат даты.',
             'search.string' => 'Неверный формат поиска.',
             'search.max' => 'Максимальная длина поиска: :max символов.',
-            'date_from.date' => 'Неверный формат даты.',
-            'date_to.date' => 'Неверный формат даты.',
+            'date_from.date_format' => 'Неверный формат даты.',
+            'date_to.date_format' => 'Неверный формат даты.',
+            'date_to.after_or_equal' => 'Дата по должна быть позже или совпадать с датой с.',
             'status.string' => 'Неверный формат статуса.',
-            'status.in' => 'Неверный статус.',
-            'date_from.date' => 'Неверный формат даты.',
-            'date_to.date' => 'Неверный формат даты.',
-            'status.string' => 'Неверный формат статуса.',
-            'status.in' => 'Неверный статус.',
         ];
     }
 

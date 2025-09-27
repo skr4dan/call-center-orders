@@ -44,7 +44,7 @@ class OrderRepository
     public function getFilteredOrdersPaginated(array $filters = []): LengthAwarePaginator
     {
         $query = $this->getBaseOrderQuery()
-            ->orderBy('date', 'desc');
+            ->orderByDesc('created_at');
 
         $query = $this->applyFilters($query, $filters);
 
@@ -81,13 +81,18 @@ class OrderRepository
 
         if (isset($data['products']) && is_array($data['products'])) {
             foreach ($data['products'] as $productData) {
-                if (filled($productData['name']) && $productData['quantity'] > 0) {
-                    $order->products()->create([
-                        'name' => $productData['name'],
-                        'quantity' => $productData['quantity'],
-                        'unit' => $productData['unit'] ?? OrderProduct::UNIT_PIECES,
-                    ]);
+                $name = Arr::get($productData, 'name');
+                $quantity = Arr::get($productData, 'quantity');
+
+                if (blank($name) || ! is_numeric($quantity) || (int) $quantity <= 0) {
+                    continue;
                 }
+
+                $order->products()->create([
+                    'name' => $name,
+                    'quantity' => (int) $quantity,
+                    'unit' => Arr::get($productData, 'unit', OrderProduct::UNIT_PIECES),
+                ]);
             }
         }
 
