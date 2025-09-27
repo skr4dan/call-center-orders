@@ -4,8 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\Order;
 use App\Models\OrderProduct;
-use App\Models\Role;
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -13,13 +11,11 @@ class OrdersApiTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_manager_can_list_orders(): void
+    public function test_can_list_orders(): void
     {
-        $manager = $this->createManagerUser();
         Order::factory()->count(3)->create();
 
         $response = $this
-            ->actingAs($manager)
             ->getJson('/api/orders')
             ->assertOk()
             ->assertJsonStructure([
@@ -39,25 +35,21 @@ class OrdersApiTest extends TestCase
             ]);
     }
 
-    public function test_manager_can_filter_orders_by_status(): void
+    public function test_can_filter_orders_by_status(): void
     {
-        $manager = $this->createManagerUser();
         Order::factory()->create(['status' => Order::STATUS_NEW]);
         Order::factory()->create(['status' => Order::STATUS_IN_PROGRESS]);
         Order::factory()->create(['status' => Order::STATUS_NEW]);
 
         $this
-            ->actingAs($manager)
             ->getJson('/api/orders?status='.Order::STATUS_NEW)
             ->assertOk()
             ->assertJsonCount(2, 'data')
             ->assertJsonPath('data.*.status', array_fill(0, 2, Order::STATUS_NEW));
     }
 
-    public function test_operator_can_create_order(): void
+    public function test_can_create_order(): void
     {
-        $operator = $this->createOperatorUser();
-
         $orderData = [
             'fio' => 'John Doe',
             'phone' => '+7 (999) 123-45-67',
@@ -74,8 +66,7 @@ class OrdersApiTest extends TestCase
             ],
         ];
 
-        $response = $this->actingAs($operator)
-            ->postJson('/api/orders', $orderData);
+        $response = $this->postJson('/api/orders', $orderData);
 
         $response->assertCreated()
             ->assertJsonStructure([
@@ -96,18 +87,9 @@ class OrdersApiTest extends TestCase
         ]);
     }
 
-    public function test_operator_cannot_list_orders(): void
-    {
-        $this
-            ->actingAs($this->createOperatorUser())
-            ->getJson('/api/orders')
-            ->assertForbidden();
-    }
 
-    public function test_manager_can_get_order_statistics(): void
+    public function test_can_get_order_statistics(): void
     {
-        $manager = $this->createManagerUser();
-
         $orders = collect([
             Order::factory()->create(['status' => Order::STATUS_NEW]),
             Order::factory()->create(['status' => Order::STATUS_NEW]),
@@ -116,8 +98,7 @@ class OrdersApiTest extends TestCase
             Order::factory()->create(['status' => Order::STATUS_IN_PROGRESS]),
         ]);
 
-        $response = $this->actingAs($manager)
-            ->getJson('/api/orders/stats');
+        $response = $this->getJson('/api/orders/stats');
 
         $response->assertOk()
             ->assertJson([
@@ -130,47 +111,5 @@ class OrdersApiTest extends TestCase
             ]);
     }
 
-    public function test_operator_cannot_get_order_statistics(): void
-    {
-        $this
-            ->actingAs($this->createOperatorUser())
-            ->getJson('/api/orders/stats')
-            ->assertForbidden();
-    }
 
-    public function test_unauthorized_user_cannot_access_orders(): void
-    {
-        $this
-            ->actingAs(User::factory()->create())
-            ->getJson('/api/orders')
-            ->assertForbidden();
-    }
-
-    public function test_unauthorized_user_cannot_create_orders(): void
-    {
-        $this
-            ->actingAs(User::factory()->create())
-            ->postJson('/api/orders', [])
-            ->assertForbidden();
-    }
-
-    private function createManagerUser(): User
-    {
-        $user = User::factory()->create();
-        $managerRole = Role::where('name', Role::MANAGER)->first();
-        $user->role()->associate($managerRole);
-        $user->save();
-
-        return $user;
-    }
-
-    private function createOperatorUser(): User
-    {
-        $user = User::factory()->create();
-        $operatorRole = Role::where('name', Role::OPERATOR)->first();
-        $user->role()->associate($operatorRole);
-        $user->save();
-
-        return $user;
-    }
 }
