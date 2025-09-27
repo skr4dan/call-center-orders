@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('order_id')->constrained()->onDelete('cascade');
             $table->string('name');
             $table->integer('quantity');
-            $table->enum('unit', ['pcs', 'kg', 'l', 'm']);
+            $table->enum('unit', ['pcs', 'sets']);
             $table->timestamps();
         });
     }

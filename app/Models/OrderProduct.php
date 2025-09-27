@@ -20,24 +20,16 @@ class OrderProduct extends Model
 
     public const UNIT_PIECES = 'pcs';
 
-    public const UNIT_KILOGRAMS = 'kg';
-
-    public const UNIT_LITERS = 'l';
-
-    public const UNIT_METERS = 'm';
+    public const UNIT_SETS = 'sets';
 
     public const UNIT_LABELS = [
         self::UNIT_PIECES => 'Штуки',
-        self::UNIT_KILOGRAMS => 'Килограммы',
-        self::UNIT_LITERS => 'Литры',
-        self::UNIT_METERS => 'Метры',
+        self::UNIT_SETS => 'Комплекты',
     ];
 
     public const SHORT_UNIT_LABELS = [
         self::UNIT_PIECES => 'шт.',
-        self::UNIT_KILOGRAMS => 'кг.',
-        self::UNIT_LITERS => 'л.',
-        self::UNIT_METERS => 'м.',
+        self::UNIT_SETS => 'компл.',
     ];
 
     public function order(): BelongsTo
