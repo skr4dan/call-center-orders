@@ -13,14 +13,14 @@ class OrderStatisticsService
 
     public function getOrderStats(array $filters = []): array
     {
-        $query = $this->orderRepository->getFilteredOrdersForStats($filters);
-        $statusCounts = $this->orderRepository->getOrderStatusCounts($query);
+        $total = $this->orderRepository->getFilteredOrdersCount($filters);
+        $statuses = $this->orderRepository->getOrderCountByStatuses($filters);
 
         return [
-            'total' => $query->count(),
-            'new' => $statusCounts[Order::STATUS_NEW] ?? 0,
-            'in_progress' => $statusCounts[Order::STATUS_IN_PROGRESS] ?? 0,
-            'done' => $statusCounts[Order::STATUS_DONE] ?? 0,
+            'total' => $total,
+            'new' => $statuses[Order::STATUS_NEW] ?? 0,
+            'in_progress' => $statuses[Order::STATUS_IN_PROGRESS] ?? 0,
+            'done' => $statuses[Order::STATUS_DONE] ?? 0,
         ];
     }
 }

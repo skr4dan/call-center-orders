@@ -51,16 +51,15 @@ class OrderRepository
         return $query->paginate(50);
     }
 
-    public function getFilteredOrdersForStats(array $filters = []): Builder
+    public function getFilteredOrdersCount(array $filters = []): Builder
     {
-        $query = Order::query();
-
-        return $this->applyFilters($query, Arr::except($filters, ['status']));
+        return $this->applyFilters(Order::query(), Arr::except($filters, ['status']));
     }
 
-    public function getOrderStatusCounts(Builder $query): array
+    public function getOrderCountByStatuses(array $filters = []): array
     {
-        return $query
+        return $this
+            ->applyFilters(Order::query(), $filters)
             ->selectRaw('status, COUNT(*) as count')
             ->groupBy('status')
             ->pluck('count', 'status')
