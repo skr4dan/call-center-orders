@@ -2,7 +2,7 @@
 
 @section('content')
 <x-layout.centered>
-    <x-card title="Авторизация">
+    <x-card title="Авторизация" titleClass="text-center w-full">
         <form method="POST" action="{{ route('login.store') }}" class="space-y-4">
             @csrf
 
