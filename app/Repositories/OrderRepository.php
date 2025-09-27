@@ -51,9 +51,9 @@ class OrderRepository
         return $query->paginate(50);
     }
 
-    public function getFilteredOrdersCount(array $filters = []): Builder
+    public function getFilteredOrdersCount(array $filters = []): int
     {
-        return $this->applyFilters(Order::query(), Arr::except($filters, ['status']));
+        return $this->applyFilters(Order::query(), Arr::except($filters, ['status']))->count();
     }
 
     public function getOrderCountByStatuses(array $filters = []): array
