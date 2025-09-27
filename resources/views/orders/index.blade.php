@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="h-screen bg-gray-100 p-6 flex flex-col">
+<div class="h-screen bg-gray-100 p-15 flex flex-col">
     <div class="flex-1 bg-white rounded-lg shadow-md flex flex-col min-h-0">
         <div class="flex-shrink-0 p-4">
             <h2 class="text-lg font-semibold mb-4">Фильтры заказов</h2>
